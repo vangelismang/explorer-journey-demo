@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Using FormData to ParseForms</title>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;600&display=swap"
+            rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+    <h1>HTML form example</h1>
+</header>
+<main>
+    <form action="#" id="myForm">
+        <fieldset>
+            <legend>Author Registration</legend>
+            <div class="formBox">
+                <label for="first">First Name</label>
+                <input
+                        type="text"
+                        id="first"
+                        name="first"
+                />
+            </div>
+            <div class="formBox">
+                <label for="last">Last Name</label>
+                <input
+                        type="text"
+                        id="last"
+                        name="last"
+                        required
+                />
+            </div>
+            <div class="formBox">
+                <label for="yob">Year of birth</label>
+                <input
+                        type="number"
+                        id="yob"
+                        name="yob"
+                        required
+                        min="0"
+                        max="2021"
+                />
+            </div>
+            <div class="formBox">
+                <label for="check">I verify that the above information is correct</label>
+                <input type="checkbox" id="check" name="spam" required/>
+            </div>
+            <div class="formBox">
+                <button id="btnSubmit">Store</button>
+            </div>
+        </fieldset>
+    </form>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document
+            .getElementById('myForm')
+            .addEventListener('submit', handleForm);
+    });
+
+    function handleForm(ev) {
+        ev.preventDefault(); //stop the page reloading
+        //console.dir(ev.target);
+        let myForm = ev.target;
+        let fd = new FormData(myForm);
+
+        let json = convertFD2JSON(fd);
+
+        //send the request with the formdata
+        let url = 'http://localhost:3000/authors';
+        let h = new Headers();
+        h.append('Content-type', 'application/json');
+
+        let req = new Request(url, {
+            headers: h,
+            body: json,
+            method: 'POST',
+        });
+        fetch(req)
+            .then((res) => res.json())
+            .then((data) => alert(data))
+            .then(() => document.getElementById("myForm").reset())
+            .catch(console.warn);
+        for (let key of fd.keys()) {
+            // here you can add filtering conditions
+            fd.delete(key)
+        }
+    }
+
+    function convertFD2JSON(formData) {
+        let obj = {};
+        for (let key of formData.keys()) {
+            obj[key] = formData.get(key);
+        }
+        return JSON.stringify(obj);
+    }
+</script>
+</body>
+</html>
